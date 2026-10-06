@@ -1,100 +1,78 @@
 # 🚀 Nexora
 
-Gerenciador de tarefas full-stack desenvolvido para praticar frontend, backend, API REST, autenticação e PostgreSQL.
+> Aplicação full-stack para gerenciamento de tarefas, desenvolvida com Node.js, Express e PostgreSQL.
 
-## Stack
+O **Nexora** é um sistema completo de produtividade criado para demonstrar a construção de uma aplicação web full-stack, desde a interface até a API, autenticação e persistência de dados em banco de dados relacional.
+
+## ✨ Funcionalidades
+
+- 🔐 Cadastro e login de usuários
+- 🔑 Autenticação utilizando JWT
+- 🔒 Senhas protegidas com bcrypt
+- ➕ Criação de tarefas
+- ✏️ Edição de tarefas
+- 🗑️ Exclusão de tarefas
+- ✅ Marcação de tarefas como concluídas
+- 🎯 Sistema de prioridades
+- 📅 Definição de prazo
+- 🔍 Busca por tarefas
+- 🏷️ Filtros de tarefas
+- 📊 Estatísticas do usuário
+- 📱 Interface responsiva
+- 💾 Persistência de dados com PostgreSQL
+- 🔌 API REST
+
+## 🛠️ Tecnologias
+
+### Frontend
 
 - HTML5
 - CSS3
 - JavaScript
+- Fetch API
+- Local Storage
+- Design responsivo
+
+### Backend
+
 - Node.js
 - Express
-- PostgreSQL
+- REST API
 - JWT
 - bcrypt
 
-## Funcionalidades
+### Banco de dados
 
-- Cadastro
-- Login
-- Autenticação por JWT
-- CRUD de tarefas
-- Prioridades
-- Prazo
-- Filtro
-- Busca
-- Estatísticas
-- Conclusão de tarefas
-- Exclusão e edição
+- PostgreSQL
+- SQL
 
-## Estrutura
+### Ferramentas
 
-```text
-nexora/
-├── db/
-│   └── schema.sql
-├── public/
-│   ├── index.html
-│   ├── style.css
-│   └── app.js
-├── .env.example
-├── .gitignore
-├── package.json
-├── README.md
-└── server.js
-```
+- Git
+- GitHub
+- VS Code
+- npm
 
-## Como executar
+## 🏗️ Arquitetura
 
-### 1. Instalar dependências
-
-```bash
-npm install
-```
-
-### 2. Criar o banco PostgreSQL
-
-Crie um banco chamado `nexora` e execute:
+O projeto utiliza uma arquitetura simples de aplicação full-stack:
 
 ```text
-db/schema.sql
-```
-
-### 3. Configurar variáveis
-
-Copie `.env.example` para `.env` e configure:
-
-```env
-PORT=3000
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/nexora
-JWT_SECRET=uma-chave-secreta-forte
-```
-
-### 4. Iniciar
-
-```bash
-npm run dev
-```
-
-Abra:
-
-```text
-http://localhost:3000
-```
-
-## Próximas melhorias
-
-- Recuperação de senha
-- Refresh token
-- Paginação
-- Categorias
-- Dashboard com gráficos
-- Upload de avatar
-- Testes automatizados
-- Docker
-- Deploy do backend
-- Deploy do PostgreSQL
-
-## Autor
-
-Jonas Sousa
+┌──────────────────────┐
+│      Frontend        │
+│   HTML / CSS / JS    │
+└──────────┬───────────┘
+           │
+           │ HTTP / REST
+           ▼
+┌──────────────────────┐
+│       Backend        │
+│   Node.js + Express  │
+└──────────┬───────────┘
+           │
+           │ SQL
+           ▼
+┌──────────────────────┐
+│     PostgreSQL       │
+│      Database        │
+└──────────────────────┘
