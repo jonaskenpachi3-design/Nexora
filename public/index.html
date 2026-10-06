@@ -3,118 +3,632 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Nexora — gerenciador de tarefas full-stack.">
+
+  <meta
+    name="description"
+    content="Nexora — gerenciador de tarefas full-stack."
+  >
+
   <title>Nexora | Jonas Sousa</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
+
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
+
+  <!-- TOAST -->
   <div id="toast" class="toast" role="status"></div>
 
+  <!-- AUTH -->
   <section id="auth-screen" class="auth-screen">
+
     <div class="auth-card">
-      <div class="brand">Nexora</div>
+
+      <div class="brand">
+        <span class="brand-mark">✓</span>
+        <span class="brand-name">Nexora</span>
+      </div>
+
       <p class="eyebrow">FULL-STACK PROJECT</p>
+
       <h1>Organize seu trabalho.</h1>
-      <p class="muted">Gerencie tarefas, prioridades e prazos em um único lugar.</p>
+
+      <p class="muted">
+        Gerencie tarefas, prioridades e prazos em um único lugar.
+      </p>
 
       <div class="tabs">
-        <button class="tab active" data-auth-tab="login">Entrar</button>
-        <button class="tab" data-auth-tab="register">Criar conta</button>
+        <button
+          class="tab active"
+          data-auth-tab="login"
+          type="button"
+        >
+          Entrar
+        </button>
+
+        <button
+          class="tab"
+          data-auth-tab="register"
+          type="button"
+        >
+          Criar conta
+        </button>
       </div>
 
+      <!-- LOGIN -->
       <form id="login-form" class="auth-form">
-        <label>E-mail<input id="login-email" type="email" required autocomplete="email"></label>
-        <label>Senha<input id="login-password" type="password" required autocomplete="current-password"></label>
-        <button class="primary-btn" type="submit">Entrar</button>
-      </form>
 
-      <form id="register-form" class="auth-form hidden">
-        <label>Nome<input id="register-name" type="text" required autocomplete="name"></label>
-        <label>E-mail<input id="register-email" type="email" required autocomplete="email"></label>
-        <label>Senha<input id="register-password" type="password" minlength="6" required autocomplete="new-password"></label>
-        <button class="primary-btn" type="submit">Criar minha conta</button>
-      </form>
-    </div>
-  </section>
+        <label>
+          E-mail
 
-  <section id="app-screen" class="app-screen hidden">
-    <header class="topbar">
-      <div class="brand">Nexora</div>
-      <div class="user-area">
-        <span id="user-name"></span>
-        <button id="logout-btn" class="ghost-btn">Sair</button>
-      </div>
-    </header>
-
-    <main class="container">
-      <section class="hero">
-        <div>
-          <p class="eyebrow">SEU PAINEL</p>
-          <h2>Olá, <span id="hero-name"></span> 👋</h2>
-          <p class="muted">Acompanhe suas tarefas e mantenha o foco no que importa.</p>
-        </div>
-        <button id="new-task-btn" class="primary-btn">+ Nova tarefa</button>
-      </section>
-
-      <section class="stats">
-        <article class="stat-card"><span>Total</span><strong id="stat-total">0</strong></article>
-        <article class="stat-card"><span>Pendentes</span><strong id="stat-pending">0</strong></article>
-        <article class="stat-card"><span>Concluídas</span><strong id="stat-done">0</strong></article>
-        <article class="stat-card"><span>Alta prioridade</span><strong id="stat-high">0</strong></article>
-      </section>
-
-      <section class="toolbar">
-        <input id="search-input" type="search" placeholder="Pesquisar tarefas...">
-        <select id="filter-select">
-          <option value="all">Todas</option>
-          <option value="pending">Pendentes</option>
-          <option value="done">Concluídas</option>
-          <option value="high">Alta prioridade</option>
-        </select>
-      </section>
-
-      <section id="task-list" class="task-list"></section>
-      <p id="empty-state" class="empty hidden">Nenhuma tarefa encontrada.</p>
-    </main>
-  </section>
-
-  <dialog id="task-dialog">
-    <form id="task-form" method="dialog" class="task-form">
-      <div class="dialog-head">
-        <div>
-          <p class="eyebrow">NEXORA</p>
-          <h3 id="dialog-title">Nova tarefa</h3>
-        </div>
-        <button type="button" id="close-dialog" class="icon-btn">×</button>
-      </div>
-
-      <input id="task-id" type="hidden">
-
-      <label>Título<input id="task-title" type="text" maxlength="160" required></label>
-      <label>Descrição<textarea id="task-description" rows="4" placeholder="Descreva a tarefa..."></textarea></label>
-
-      <div class="form-grid">
-        <label>Prioridade
-          <select id="task-priority">
-            <option value="low">Baixa</option>
-            <option value="medium" selected>Média</option>
-            <option value="high">Alta</option>
-          </select>
+          <input
+            id="login-email"
+            type="email"
+            required
+            autocomplete="email"
+            placeholder="seu@email.com"
+          >
         </label>
 
-        <label>Prazo<input id="task-due-date" type="date"></label>
+        <label>
+          Senha
+
+          <input
+            id="login-password"
+            type="password"
+            required
+            autocomplete="current-password"
+            placeholder="••••••••"
+          >
+        </label>
+
+        <button class="primary-btn" type="submit">
+          <span>Entrar</span>
+          <span class="btn-arrow">→</span>
+        </button>
+
+      </form>
+
+      <!-- REGISTER -->
+      <form id="register-form" class="auth-form hidden">
+
+        <label>
+          Nome
+
+          <input
+            id="register-name"
+            type="text"
+            required
+            autocomplete="name"
+            placeholder="Seu nome"
+          >
+        </label>
+
+        <label>
+          E-mail
+
+          <input
+            id="register-email"
+            type="email"
+            required
+            autocomplete="email"
+            placeholder="seu@email.com"
+          >
+        </label>
+
+        <label>
+          Senha
+
+          <input
+            id="register-password"
+            type="password"
+            minlength="6"
+            required
+            autocomplete="new-password"
+            placeholder="Mínimo de 6 caracteres"
+          >
+        </label>
+
+        <button class="primary-btn" type="submit">
+          <span>Criar minha conta</span>
+          <span class="btn-arrow">→</span>
+        </button>
+
+      </form>
+
+    </div>
+
+  </section>
+
+
+  <!-- APPLICATION -->
+  <section id="app-screen" class="app-screen hidden">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+
+      <div class="brand">
+        <span class="brand-mark">✓</span>
+        <span class="brand-name">Nexora</span>
       </div>
+
+      <div class="topbar-actions">
+
+        <!-- NOTIFICATIONS -->
+        <div class="notification-wrapper">
+
+          <button
+            id="notification-btn"
+            class="notification-btn"
+            type="button"
+            aria-label="Notificações"
+          >
+            🔔
+            <span id="notification-count" class="notification-count hidden">
+              0
+            </span>
+          </button>
+
+          <div
+            id="notification-panel"
+            class="notification-panel hidden"
+          >
+
+            <div class="notification-head">
+              <div>
+                <strong>Notificações</strong>
+                <span id="notification-summary">
+                  Tudo tranquilo
+                </span>
+              </div>
+
+              <button
+                id="enable-notifications"
+                class="notification-enable"
+                type="button"
+              >
+                Ativar
+              </button>
+            </div>
+
+            <div id="notification-list" class="notification-list">
+              <div class="notification-empty">
+                Nenhuma notificação.
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- USER -->
+        <div class="user-area">
+
+          <div
+            id="user-avatar"
+            class="avatar"
+            aria-hidden="true"
+          >
+            JS
+          </div>
+
+          <div class="user-details">
+            <strong id="user-name">Usuário</strong>
+            <span>Online</span>
+          </div>
+
+          <button
+            id="logout-btn"
+            class="ghost-btn"
+            type="button"
+          >
+            Sair
+          </button>
+
+        </div>
+
+      </div>
+
+    </header>
+
+
+    <main class="container">
+
+      <!-- HERO -->
+      <section class="hero">
+
+        <div>
+
+          <p class="eyebrow">SEU PAINEL</p>
+
+          <h2>
+            Olá,
+            <span id="hero-name"></span>
+            👋
+          </h2>
+
+          <p class="muted">
+            Acompanhe suas tarefas e mantenha o foco no que importa.
+          </p>
+
+        </div>
+
+        <button
+          id="new-task-btn"
+          class="primary-btn"
+          type="button"
+        >
+          <span class="plus">+</span>
+          Nova tarefa
+        </button>
+
+      </section>
+
+
+      <!-- STATS -->
+      <section class="stats">
+
+        <article class="stat-card">
+
+          <div class="stat-icon blue">◈</div>
+
+          <div>
+            <span>Total de tarefas</span>
+            <strong id="stat-total">0</strong>
+          </div>
+
+        </article>
+
+
+        <article class="stat-card">
+
+          <div class="stat-icon amber">◷</div>
+
+          <div>
+            <span>Pendentes</span>
+            <strong id="stat-pending">0</strong>
+          </div>
+
+        </article>
+
+
+        <article class="stat-card">
+
+          <div class="stat-icon green">✓</div>
+
+          <div>
+            <span>Concluídas</span>
+            <strong id="stat-done">0</strong>
+          </div>
+
+        </article>
+
+
+        <article class="stat-card">
+
+          <div class="stat-icon violet">!</div>
+
+          <div>
+            <span>Alta prioridade</span>
+            <strong id="stat-high">0</strong>
+          </div>
+
+        </article>
+
+      </section>
+
+
+      <!-- CHARTS -->
+      <section class="analytics-grid">
+
+        <article class="panel chart-panel">
+
+          <div class="panel-head">
+
+            <div>
+              <p class="eyebrow">DESEMPENHO</p>
+              <h3>Status das tarefas</h3>
+            </div>
+
+            <span class="panel-badge">
+              Atualizado agora
+            </span>
+
+          </div>
+
+          <div class="chart-container">
+            <canvas id="status-chart"></canvas>
+          </div>
+
+        </article>
+
+
+        <article class="panel chart-panel">
+
+          <div class="panel-head">
+
+            <div>
+              <p class="eyebrow">PRIORIDADES</p>
+              <h3>Distribuição</h3>
+            </div>
+
+            <span class="panel-badge">
+              Total
+            </span>
+
+          </div>
+
+          <div class="chart-container">
+            <canvas id="priority-chart"></canvas>
+          </div>
+
+        </article>
+
+      </section>
+
+
+      <!-- TOOLBAR -->
+      <section class="toolbar">
+
+        <input
+          id="search-input"
+          type="search"
+          placeholder="Pesquisar tarefas..."
+        >
+
+        <select id="filter-select">
+
+          <option value="all">
+            Todas
+          </option>
+
+          <option value="pending">
+            Pendentes
+          </option>
+
+          <option value="done">
+            Concluídas
+          </option>
+
+          <option value="high">
+            Alta prioridade
+          </option>
+
+        </select>
+
+      </section>
+
+
+      <!-- DRAG & DROP BOARD -->
+      <section class="board">
+
+        <!-- PENDING -->
+        <div
+          class="task-column"
+          data-status="pending"
+        >
+
+          <div class="column-head">
+
+            <div>
+              <div class="column-title">
+                <span class="status-dot pending-dot"></span>
+                Pendentes
+              </div>
+
+              <span class="column-subtitle">
+                Arraste tarefas para concluir
+              </span>
+            </div>
+
+            <span
+              id="pending-count"
+              class="column-count"
+            >
+              0
+            </span>
+
+          </div>
+
+          <div
+            id="pending-list"
+            class="task-list drop-zone"
+            data-drop-status="pending"
+          ></div>
+
+        </div>
+
+
+        <!-- DONE -->
+        <div
+          class="task-column"
+          data-status="done"
+        >
+
+          <div class="column-head">
+
+            <div>
+              <div class="column-title">
+                <span class="status-dot done-dot"></span>
+                Concluídas
+              </div>
+
+              <span class="column-subtitle">
+                Arraste tarefas para reabrir
+              </span>
+            </div>
+
+            <span
+              id="done-count"
+              class="column-count"
+            >
+              0
+            </span>
+
+          </div>
+
+          <div
+            id="done-list"
+            class="task-list drop-zone"
+            data-drop-status="done"
+          ></div>
+
+        </div>
+
+      </section>
+
+
+      <p id="empty-state" class="empty hidden">
+        Nenhuma tarefa encontrada.
+      </p>
+
+    </main>
+
+  </section>
+
+
+  <!-- TASK DIALOG -->
+  <dialog id="task-dialog">
+
+    <form
+      id="task-form"
+      method="dialog"
+      class="task-form"
+    >
+
+      <div class="dialog-head">
+
+        <div>
+
+          <p class="eyebrow">
+            NEXORA
+          </p>
+
+          <h3 id="dialog-title">
+            Nova tarefa
+          </h3>
+
+        </div>
+
+        <button
+          type="button"
+          id="close-dialog"
+          class="icon-btn"
+          aria-label="Fechar"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <input
+        id="task-id"
+        type="hidden"
+      >
+
+
+      <label>
+        Título
+
+        <input
+          id="task-title"
+          type="text"
+          maxlength="160"
+          required
+          placeholder="Ex: Finalizar projeto"
+        >
+      </label>
+
+
+      <label>
+        Descrição
+
+        <textarea
+          id="task-description"
+          rows="4"
+          placeholder="Descreva a tarefa..."
+        ></textarea>
+
+      </label>
+
+
+      <div class="form-grid">
+
+        <label>
+          Prioridade
+
+          <select id="task-priority">
+
+            <option value="low">
+              Baixa
+            </option>
+
+            <option value="medium" selected>
+              Média
+            </option>
+
+            <option value="high">
+              Alta
+            </option>
+
+          </select>
+
+        </label>
+
+
+        <label>
+          Prazo
+
+          <input
+            id="task-due-date"
+            type="date"
+          >
+
+        </label>
+
+      </div>
+
 
       <div class="dialog-actions">
-        <button type="button" id="cancel-dialog" class="ghost-btn">Cancelar</button>
-        <button type="submit" class="primary-btn">Salvar tarefa</button>
+
+        <button
+          type="button"
+          id="cancel-dialog"
+          class="ghost-btn"
+        >
+          Cancelar
+        </button>
+
+        <button
+          type="submit"
+          class="primary-btn"
+        >
+          Salvar tarefa
+        </button>
+
       </div>
+
     </form>
+
   </dialog>
 
+
+  <!-- CHART.JS -->
+  <script
+    src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"
+  ></script>
+
   <script src="app.js"></script>
+
 </body>
 </html>

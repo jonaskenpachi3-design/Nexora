@@ -8,242 +8,600 @@ const { Pool } = require("pg");
 const path = require("path");
 
 const app = express();
+
 const PORT = process.env.PORT || 3000;
 
-if (!process.env.DATABASE_URL || !process.env.JWT_SECRET) {
-  console.warn("Configure DATABASE_URL e JWT_SECRET no arquivo .env");
+if (!process.env.DATABASE_URL) {
+  console.error("ERRO: DATABASE_URL não configurada.");
+}
+
+if (!process.env.JWT_SECRET) {
+  console.error("ERRO: JWT_SECRET não configurada.");
 }
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === "production"
-    ? { rejectUnauthorized: false }
-    : false
+
+  ssl:
+    process.env.NODE_ENV === "production"
+      ? { rejectUnauthorized: false }
+      : false
 });
 
 app.use(cors());
 app.use(express.json());
+
 app.use(express.static(path.join(__dirname, "public")));
 
-function createToken(user) {
-  return jwt.sign(
-    { id: user.id, email: user.email, name: user.name },
-    process.env.JWT_SECRET,
-    { expiresIn: "7d" }
-  );
-}
 
-function auth(req, res, next) {
-  const header = req.headers.authorization;
-  const token = header?.startsWith("Bearer ")
-    ? header.slice(7)
-    : null;
+/* =========================
+   AUTH MIDDLEWARE
+========================= */
+
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) {
+    return res.status(401).json({
+      message: "Token não informado."
+    });
+  }
+
+  const token = authHeader.split(" ")[1];
 
   if (!token) {
-    return res.status(401).json({ message: "Token não informado." });
+    return res.status(401).json({
+      message: "Token inválido."
+    });
   }
 
   try {
-    req.user = jwt.verify(token, process.env.JWT_SECRET);
+    const user = jwt.verify(
+      token,
+      process.env.JWT_SECRET
+    );
+
+    req.user = user;
+
     next();
-  } catch {
-    return res.status(401).json({ message: "Sessão inválida ou expirada." });
+  } catch (error) {
+    return res.status(401).json({
+      message: "Token inválido ou expirado."
+    });
   }
 }
+
+
+/* =========================
+   HEALTH CHECK
+========================= */
+
+app.get("/api/health", async (req, res) => {
+  try {
+    await pool.query("SELECT 1");
+
+    res.json({
+      status: "ok",
+      application: "Nexora",
+      database: "connected"
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      status: "error",
+      application: "Nexora",
+      database: "disconnected"
+    });
+  }
+});
+
+
+/* =========================
+   REGISTER
+========================= */
 
 app.post("/api/auth/register", async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const {
+      name,
+      email,
+      password
+    } = req.body;
 
     if (!name || !email || !password) {
-      return res.status(400).json({ message: "Preencha todos os campos." });
+      return res.status(400).json({
+        message: "Preencha todos os campos."
+      });
     }
 
     if (password.length < 6) {
-      return res.status(400).json({ message: "A senha deve ter pelo menos 6 caracteres." });
+      return res.status(400).json({
+        message: "A senha precisa ter pelo menos 6 caracteres."
+      });
     }
 
-    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedEmail = email
+      .trim()
+      .toLowerCase();
 
-    const existing = await pool.query(
+    const existingUser = await pool.query(
       "SELECT id FROM users WHERE email = $1",
       [normalizedEmail]
     );
 
-    if (existing.rowCount) {
-      return res.status(409).json({ message: "Este e-mail já está cadastrado." });
+    if (existingUser.rows.length > 0) {
+      return res.status(409).json({
+        message: "Este e-mail já está cadastrado."
+      });
     }
 
-    const passwordHash = await bcrypt.hash(password, 12);
+    const passwordHash = await bcrypt.hash(
+      password,
+      10
+    );
 
     const result = await pool.query(
-      `INSERT INTO users (name, email, password_hash)
-       VALUES ($1, $2, $3)
-       RETURNING id, name, email`,
-      [name.trim(), normalizedEmail, passwordHash]
+      `
+      INSERT INTO users
+      (name, email, password_hash)
+      VALUES ($1, $2, $3)
+      RETURNING id, name, email
+      `,
+      [
+        name.trim(),
+        normalizedEmail,
+        passwordHash
+      ]
     );
 
     const user = result.rows[0];
 
+    const token = jwt.sign(
+      {
+        id: user.id,
+        email: user.email
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "7d"
+      }
+    );
+
     res.status(201).json({
-      user,
-      token: createToken(user)
+      message: "Conta criada com sucesso.",
+      token,
+      user
     });
+
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Erro ao criar conta." });
+    console.error("REGISTER ERROR:", error);
+
+    res.status(500).json({
+      message: "Erro ao criar conta."
+    });
   }
 });
 
+
+/* =========================
+   LOGIN
+========================= */
+
 app.post("/api/auth/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const {
+      email,
+      password
+    } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({
+        message: "Informe e-mail e senha."
+      });
+    }
+
+    const normalizedEmail = email
+      .trim()
+      .toLowerCase();
 
     const result = await pool.query(
-      "SELECT * FROM users WHERE email = $1",
-      [email?.trim().toLowerCase()]
+      `
+      SELECT
+        id,
+        name,
+        email,
+        password_hash
+      FROM users
+      WHERE email = $1
+      `,
+      [normalizedEmail]
     );
+
+    if (result.rows.length === 0) {
+      return res.status(401).json({
+        message: "E-mail ou senha incorretos."
+      });
+    }
 
     const user = result.rows[0];
 
-    if (!user || !(await bcrypt.compare(password || "", user.password_hash))) {
-      return res.status(401).json({ message: "E-mail ou senha inválidos." });
+    const validPassword =
+      await bcrypt.compare(
+        password,
+        user.password_hash
+      );
+
+    if (!validPassword) {
+      return res.status(401).json({
+        message: "E-mail ou senha incorretos."
+      });
     }
 
+    const token = jwt.sign(
+      {
+        id: user.id,
+        email: user.email
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "7d"
+      }
+    );
+
     res.json({
+      message: "Login realizado com sucesso.",
+      token,
       user: {
         id: user.id,
         name: user.name,
         email: user.email
-      },
-      token: createToken(user)
+      }
     });
+
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Erro ao fazer login." });
+    console.error("LOGIN ERROR:", error);
+
+    res.status(500).json({
+      message: "Erro ao fazer login."
+    });
   }
 });
 
-app.get("/api/me", auth, async (req, res) => {
-  const result = await pool.query(
-    "SELECT id, name, email, created_at FROM users WHERE id = $1",
-    [req.user.id]
-  );
 
-  res.json(result.rows[0]);
-});
+/* =========================
+   CURRENT USER
+========================= */
 
-app.get("/api/tasks", auth, async (req, res) => {
-  const result = await pool.query(
-    `SELECT id, title, description, priority, due_date, completed, created_at, updated_at
-     FROM tasks
-     WHERE user_id = $1
-     ORDER BY completed ASC, due_date ASC NULLS LAST, created_at DESC`,
-    [req.user.id]
-  );
+app.get(
+  "/api/me",
+  authenticateToken,
+  async (req, res) => {
+    try {
+      const result = await pool.query(
+        `
+        SELECT id, name, email, created_at
+        FROM users
+        WHERE id = $1
+        `,
+        [req.user.id]
+      );
 
-  res.json(result.rows);
-});
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          message: "Usuário não encontrado."
+        });
+      }
 
-app.post("/api/tasks", auth, async (req, res) => {
-  try {
-    const { title, description = "", priority = "medium", dueDate = null } = req.body;
+      res.json(result.rows[0]);
 
-    if (!title?.trim()) {
-      return res.status(400).json({ message: "O título é obrigatório." });
+    } catch (error) {
+      console.error(error);
+
+      res.status(500).json({
+        message: "Erro ao carregar usuário."
+      });
     }
-
-    if (!["low", "medium", "high"].includes(priority)) {
-      return res.status(400).json({ message: "Prioridade inválida." });
-    }
-
-    const result = await pool.query(
-      `INSERT INTO tasks (user_id, title, description, priority, due_date)
-       VALUES ($1, $2, $3, $4, $5)
-       RETURNING *`,
-      [req.user.id, title.trim(), description.trim(), priority, dueDate || null]
-    );
-
-    res.status(201).json(result.rows[0]);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Erro ao criar tarefa." });
   }
-});
+);
 
-app.put("/api/tasks/:id", auth, async (req, res) => {
-  try {
-    const { title, description = "", priority, dueDate = null, completed = false } = req.body;
 
-    if (!title?.trim()) {
-      return res.status(400).json({ message: "O título é obrigatório." });
+/* =========================
+   GET TASKS
+========================= */
+
+app.get(
+  "/api/tasks",
+  authenticateToken,
+  async (req, res) => {
+    try {
+      const result = await pool.query(
+        `
+        SELECT
+          id,
+          title,
+          description,
+          priority,
+          due_date,
+          completed,
+          created_at,
+          updated_at
+        FROM tasks
+        WHERE user_id = $1
+        ORDER BY
+          completed ASC,
+          due_date ASC NULLS LAST,
+          created_at DESC
+        `,
+        [req.user.id]
+      );
+
+      res.json(result.rows);
+
+    } catch (error) {
+      console.error(error);
+
+      res.status(500).json({
+        message: "Erro ao carregar tarefas."
+      });
     }
+  }
+);
 
-    const result = await pool.query(
-      `UPDATE tasks
-       SET title = $1,
-           description = $2,
-           priority = $3,
-           due_date = $4,
-           completed = $5,
-           updated_at = NOW()
-       WHERE id = $6 AND user_id = $7
-       RETURNING *`,
-      [
-        title.trim(),
-        description.trim(),
+
+/* =========================
+   CREATE TASK
+========================= */
+
+app.post(
+  "/api/tasks",
+  authenticateToken,
+  async (req, res) => {
+    try {
+      const {
+        title,
+        description,
         priority,
-        dueDate || null,
-        Boolean(completed),
-        req.params.id,
-        req.user.id
-      ]
-    );
+        due_date
+      } = req.body;
 
-    if (!result.rowCount) {
-      return res.status(404).json({ message: "Tarefa não encontrada." });
+      if (!title || !title.trim()) {
+        return res.status(400).json({
+          message: "O título da tarefa é obrigatório."
+        });
+      }
+
+      const allowedPriorities = [
+        "low",
+        "medium",
+        "high"
+      ];
+
+      const finalPriority =
+        allowedPriorities.includes(priority)
+          ? priority
+          : "medium";
+
+      const result = await pool.query(
+        `
+        INSERT INTO tasks
+        (
+          user_id,
+          title,
+          description,
+          priority,
+          due_date
+        )
+        VALUES ($1, $2, $3, $4, $5)
+        RETURNING *
+        `,
+        [
+          req.user.id,
+          title.trim(),
+          description || "",
+          finalPriority,
+          due_date || null
+        ]
+      );
+
+      res.status(201).json(result.rows[0]);
+
+    } catch (error) {
+      console.error(error);
+
+      res.status(500).json({
+        message: "Erro ao criar tarefa."
+      });
     }
-
-    res.json(result.rows[0]);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Erro ao atualizar tarefa." });
   }
-});
+);
 
-app.patch("/api/tasks/:id/toggle", auth, async (req, res) => {
-  const result = await pool.query(
-    `UPDATE tasks
-     SET completed = NOT completed, updated_at = NOW()
-     WHERE id = $1 AND user_id = $2
-     RETURNING *`,
-    [req.params.id, req.user.id]
-  );
 
-  if (!result.rowCount) {
-    return res.status(404).json({ message: "Tarefa não encontrada." });
+/* =========================
+   UPDATE TASK
+========================= */
+
+app.put(
+  "/api/tasks/:id",
+  authenticateToken,
+  async (req, res) => {
+    try {
+      const taskId = Number(req.params.id);
+
+      const {
+        title,
+        description,
+        priority,
+        due_date
+      } = req.body;
+
+      if (!title || !title.trim()) {
+        return res.status(400).json({
+          message: "O título é obrigatório."
+        });
+      }
+
+      const result = await pool.query(
+        `
+        UPDATE tasks
+        SET
+          title = $1,
+          description = $2,
+          priority = $3,
+          due_date = $4,
+          updated_at = NOW()
+        WHERE
+          id = $5
+          AND user_id = $6
+        RETURNING *
+        `,
+        [
+          title.trim(),
+          description || "",
+          priority || "medium",
+          due_date || null,
+          taskId,
+          req.user.id
+        ]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          message: "Tarefa não encontrada."
+        });
+      }
+
+      res.json(result.rows[0]);
+
+    } catch (error) {
+      console.error(error);
+
+      res.status(500).json({
+        message: "Erro ao atualizar tarefa."
+      });
+    }
   }
+);
 
-  res.json(result.rows[0]);
-});
 
-app.delete("/api/tasks/:id", auth, async (req, res) => {
-  const result = await pool.query(
-    "DELETE FROM tasks WHERE id = $1 AND user_id = $2 RETURNING id",
-    [req.params.id, req.user.id]
-  );
+/* =========================
+   TOGGLE TASK
+========================= */
 
-  if (!result.rowCount) {
-    return res.status(404).json({ message: "Tarefa não encontrada." });
+app.patch(
+  "/api/tasks/:id/toggle",
+  authenticateToken,
+  async (req, res) => {
+    try {
+      const taskId = Number(req.params.id);
+
+      const result = await pool.query(
+        `
+        UPDATE tasks
+        SET
+          completed = NOT completed,
+          updated_at = NOW()
+        WHERE
+          id = $1
+          AND user_id = $2
+        RETURNING *
+        `,
+        [
+          taskId,
+          req.user.id
+        ]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          message: "Tarefa não encontrada."
+        });
+      }
+
+      res.json(result.rows[0]);
+
+    } catch (error) {
+      console.error(error);
+
+      res.status(500).json({
+        message: "Erro ao alterar tarefa."
+      });
+    }
   }
+);
 
-  res.status(204).send();
-});
+
+/* =========================
+   DELETE TASK
+========================= */
+
+app.delete(
+  "/api/tasks/:id",
+  authenticateToken,
+  async (req, res) => {
+    try {
+      const taskId = Number(req.params.id);
+
+      const result = await pool.query(
+        `
+        DELETE FROM tasks
+        WHERE
+          id = $1
+          AND user_id = $2
+        RETURNING id
+        `,
+        [
+          taskId,
+          req.user.id
+        ]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          message: "Tarefa não encontrada."
+        });
+      }
+
+      res.json({
+        message: "Tarefa excluída com sucesso."
+      });
+
+    } catch (error) {
+      console.error(error);
+
+      res.status(500).json({
+        message: "Erro ao excluir tarefa."
+      });
+    }
+  }
+);
+
+
+/* =========================
+   FRONTEND
+========================= */
 
 app.use((req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+  res.sendFile(
+    path.join(
+      __dirname,
+      "public",
+      "index.html"
+    )
+  );
 });
 
-app.listen(PORT, () => {
-  console.log(`Nexora rodando em http://localhost:${PORT}`);
-});
+
+/* =========================
+   START SERVER
+========================= */
+
+app.listen(
+  PORT,
+  "0.0.0.0",
+  () => {
+    console.log(
+      `Nexora rodando na porta ${PORT}`
+    );
+  }
+);
