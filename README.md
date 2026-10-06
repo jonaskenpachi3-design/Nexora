@@ -1,78 +1,59 @@
 # 🚀 Nexora
 
-> Aplicação full-stack para gerenciamento de tarefas, desenvolvida com Node.js, Express e PostgreSQL.
+<p align="center">
+  <img src="public/nexora-logo.png" alt="Nexora Logo" width="120">
+</p>
 
-O **Nexora** é um sistema completo de produtividade criado para demonstrar a construção de uma aplicação web full-stack, desde a interface até a API, autenticação e persistência de dados em banco de dados relacional.
+<h1 align="center">Nexora</h1>
 
-## ✨ Funcionalidades
+<p align="center">
+  Sistema Full Stack de gerenciamento de tarefas
+</p>
 
-- 🔐 Cadastro e login de usuários
-- 🔑 Autenticação utilizando JWT
-- 🔒 Senhas protegidas com bcrypt
-- ➕ Criação de tarefas
-- ✏️ Edição de tarefas
-- 🗑️ Exclusão de tarefas
-- ✅ Marcação de tarefas como concluídas
-- 🎯 Sistema de prioridades
-- 📅 Definição de prazo
-- 🔍 Busca por tarefas
-- 🏷️ Filtros de tarefas
-- 📊 Estatísticas do usuário
-- 📱 Interface responsiva
-- 💾 Persistência de dados com PostgreSQL
-- 🔌 API REST
+<p align="center">
+  <strong>Organize. Priorize. Conclua.</strong>
+</p>
 
-## 🛠️ Tecnologias
+<p align="center">
+  Node.js • Express • PostgreSQL • JavaScript • JWT • Chart.js
+</p>
 
-### Frontend
+---
 
-- HTML5
-- CSS3
-- JavaScript
-- Fetch API
-- Local Storage
-- Design responsivo
+## 📌 Sobre o projeto
 
-### Backend
+O **Nexora** é um sistema Full Stack de gerenciamento de tarefas desenvolvido para demonstrar, na prática, conhecimentos de desenvolvimento web, criação de APIs, autenticação, banco de dados e construção de interfaces modernas.
 
-- Node.js
-- Express
-- REST API
-- JWT
-- bcrypt
+O sistema permite que usuários criem suas próprias contas e gerenciem suas tarefas através de um dashboard completo.
 
-### Banco de dados
+Cada usuário possui seus próprios dados e tarefas, protegidos por autenticação utilizando **JWT**.
 
-- PostgreSQL
-- SQL
+O projeto foi desenvolvido com foco em:
 
-### Ferramentas
+- Desenvolvimento Full Stack
+- API REST
+- Autenticação
+- Banco de dados relacional
+- CRUD
+- Segurança básica
+- Interface responsiva
+- Experiência do usuário
+- Organização de código
+- Deploy em ambiente de produção
 
-- Git
-- GitHub
-- VS Code
-- npm
+---
 
-## 🏗️ Arquitetura
+# 🎯 Objetivo
 
-O projeto utiliza uma arquitetura simples de aplicação full-stack:
+O objetivo principal do Nexora é demonstrar a construção de uma aplicação completa, conectando:
 
 ```text
-┌──────────────────────┐
-│      Frontend        │
-│   HTML / CSS / JS    │
-└──────────┬───────────┘
-           │
-           │ HTTP / REST
-           ▼
-┌──────────────────────┐
-│       Backend        │
-│   Node.js + Express  │
-└──────────┬───────────┘
-           │
-           │ SQL
-           ▼
-┌──────────────────────┐
-│     PostgreSQL       │
-│      Database        │
-└──────────────────────┘
+Frontend
+   ↓
+JavaScript
+   ↓
+API REST
+   ↓
+Node.js + Express
+   ↓
+PostgreSQL
