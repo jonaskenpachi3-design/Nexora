@@ -1,3 +1,8 @@
+## 🌐 Demo
+
+🚀 **Nexora Online:**  
+https://nexora-3gl1.onrender.com/
+
 # 🚀 Nexora
 
 <p align="center">
