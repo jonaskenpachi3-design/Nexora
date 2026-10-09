@@ -1030,15 +1030,6 @@ async function handleTaskSubmit(event) {
 
   event.preventDefault();
 
-  const currentTask =
-    editingId
-      ? tasks.find(
-          task =>
-            task.id === editingId
-        )
-      : null;
-
-
   const payload = {
 
     title:
@@ -1050,12 +1041,9 @@ async function handleTaskSubmit(event) {
     priority:
       $("#task-priority").value,
 
-    dueDate:
+    due_date:
       $("#task-due-date").value ||
-      null,
-
-    completed:
-      currentTask?.completed || false
+      null
   };
 
 
