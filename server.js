@@ -11,12 +11,24 @@ const app = express();
 
 const PORT = process.env.PORT || 3000;
 
-if (!process.env.DATABASE_URL) {
-  console.error("ERRO: DATABASE_URL não configurada.");
+const missingEnv = ["DATABASE_URL", "JWT_SECRET"].filter(
+  (name) => !process.env[name]
+);
+
+if (missingEnv.length > 0) {
+  console.error(
+    `ERRO: variáveis de ambiente não configuradas: ${missingEnv.join(", ")}.`
+  );
+
+  process.exit(1);
 }
 
-if (!process.env.JWT_SECRET) {
-  console.error("ERRO: JWT_SECRET não configurada.");
+const ALLOWED_PRIORITIES = ["low", "medium", "high"];
+
+function normalizePriority(priority) {
+  return ALLOWED_PRIORITIES.includes(priority)
+    ? priority
+    : "medium";
 }
 
 const pool = new Pool({
@@ -307,6 +319,23 @@ app.get(
 
 
 /* =========================
+   VALIDATE TASK ID
+========================= */
+
+function validateTaskId(req, res, next) {
+  const taskId = Number(req.params.id);
+
+  if (!Number.isInteger(taskId) || taskId <= 0) {
+    return res.status(400).json({
+      message: "Identificador de tarefa inválido."
+    });
+  }
+
+  next();
+}
+
+
+/* =========================
    GET TASKS
 ========================= */
 
@@ -371,16 +400,8 @@ app.post(
         });
       }
 
-      const allowedPriorities = [
-        "low",
-        "medium",
-        "high"
-      ];
-
       const finalPriority =
-        allowedPriorities.includes(priority)
-          ? priority
-          : "medium";
+        normalizePriority(priority);
 
       const result = await pool.query(
         `
@@ -424,6 +445,7 @@ app.post(
 app.put(
   "/api/tasks/:id",
   authenticateToken,
+  validateTaskId,
   async (req, res) => {
     try {
       const taskId = Number(req.params.id);
@@ -458,7 +480,7 @@ app.put(
         [
           title.trim(),
           description || "",
-          priority || "medium",
+          normalizePriority(priority),
           due_date || null,
           taskId,
           req.user.id
@@ -491,6 +513,7 @@ app.put(
 app.patch(
   "/api/tasks/:id/toggle",
   authenticateToken,
+  validateTaskId,
   async (req, res) => {
     try {
       const taskId = Number(req.params.id);
@@ -538,6 +561,7 @@ app.patch(
 app.delete(
   "/api/tasks/:id",
   authenticateToken,
+  validateTaskId,
   async (req, res) => {
     try {
       const taskId = Number(req.params.id);
@@ -575,6 +599,17 @@ app.delete(
     }
   }
 );
+
+
+/* =========================
+   API 404
+========================= */
+
+app.use("/api", (req, res) => {
+  res.status(404).json({
+    message: "Endpoint da API não encontrado."
+  });
+});
 
 
 /* =========================
