@@ -1,10 +1,3 @@
-## 🌐 Demo
-
-🚀 **Nexora Online:**  
-https://nexora-3gl1.onrender.com/
-
-# 🚀 Nexora
-
 <p align="center">
   <img src="public/nexora-logo.png" alt="Nexora Logo" width="120">
 </p>
@@ -21,6 +14,10 @@ https://nexora-3gl1.onrender.com/
 
 <p align="center">
   Node.js • Express • PostgreSQL • JavaScript • JWT • Chart.js
+</p>
+
+<p align="center">
+  <a href="https://nexora-3gl1.onrender.com/"><strong>🚀 Ver demonstração online</strong></a>
 </p>
 
 ---
