@@ -210,3 +210,9 @@ Corpo de `POST /api/tasks` e `PUT /api/tasks/:id`:
 ## 👤 Autor
 
 Desenvolvido por **Jonas Sousa**.
+
+---
+
+## 📄 Licença
+
+Distribuído sob a licença **MIT**. Veja o arquivo [LICENSE](LICENSE).
